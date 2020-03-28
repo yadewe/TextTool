@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace TextFormatTool
 {
@@ -13,16 +14,47 @@ namespace TextFormatTool
 		/// <summary>
 		/// 格式化剪切板中的字符串，用逗号分隔
 		/// </summary>
-		/// <param name="args"></param>
+		/// <param name="args">参数支持：
+		/// style：格式化样式，0 逗号拼接，1 逗号拼接+单引号
+		/// count：每行数量
+		/// 例子：sylte=1 count=50</param>
 		[STAThread]
 		private static void Main(string[] args)
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(defaultValue: false);
-			CopyText(args?.FirstOrDefault()?.ToLower() == "-style=1");
+			bool isAddSingleQuote = false;
+			int lineCount = 20;
+
+            #region 参数处理
+
+            if (args != null)
+			{
+				foreach (var item in args)
+				{
+					var arr = item.Split('=');
+					var key = arr[0];
+					var value = arr.Last();
+					switch(key)
+						{
+						case "style":
+							// 加单引号
+							isAddSingleQuote = value == "1";
+							break;
+						case "count":
+							if(!int.TryParse(value, out lineCount))
+								lineCount = 20;
+							break;
+					}
+				}
+			}
+
+            #endregion
+
+            CopyText(isAddSingleQuote, lineCount);
 		}
 
-		public static void CopyText(bool isAddSingleQuote)
+		public static void CopyText(bool isAddSingleQuote, int lineCount)
 		{
 			try
 			{
@@ -38,12 +70,11 @@ namespace TextFormatTool
 
 				// TODO count 20 every line
 
-				int num = 20;
 				StringBuilder result = new StringBuilder();
 				IEnumerable<string> items = list;
 				while (items.Count() > 0)
 				{
-					var lineList = items.Take(num);
+					var lineList = items.Take(lineCount);
 					items = items.Skip(lineList.Count());
 					if (result.Length != 0)
 						result.Append(Environment.NewLine + ",");
@@ -60,5 +91,6 @@ namespace TextFormatTool
 			{
 			}
 		}
+
 	}
 }
