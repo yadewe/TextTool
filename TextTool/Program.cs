@@ -35,15 +35,26 @@ namespace TextFormatTool
 					list.Add(item.Value);
 				}
 				list = list.Distinct().ToList();
-				string result;
 
 				// TODO count 20 every line
 
-				if (isAddSingleQuote)
-					result = string.Join(",", list.Select(p => $"'{p}'"));
-				else
-					result = string.Join(",", list);
-				Clipboard.SetDataObject(result, copy: true);
+				int num = 20;
+				StringBuilder result = new StringBuilder();
+				IEnumerable<string> items = list;
+				while (items.Count() > 0)
+				{
+					var lineList = items.Take(num);
+					items = items.Skip(lineList.Count());
+					if (result.Length != 0)
+						result.Append(Environment.NewLine + ",");
+
+					if (isAddSingleQuote)
+						result.Append(string.Join(",", lineList.Select(p => $"'{p}'")));
+					else
+						result.Append(string.Join(",", lineList));
+				}
+			
+				Clipboard.SetDataObject(result.ToString(), copy: true);
 			}
 			catch (Exception)
 			{
