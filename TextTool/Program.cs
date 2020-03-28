@@ -17,24 +17,31 @@ namespace TextFormatTool
 		/// <param name="args">参数支持：
 		/// style：格式化样式，0 逗号拼接，1 逗号拼接+单引号
 		/// count：每行数量
-		/// 例子：sylte=1 count=50</param>
+		/// sepa：用什么字符拼接，如,
+		/// 例子：sylte=1 count=50 sepa=,</param>
 		[STAThread]
 		private static void Main(string[] args)
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(defaultValue: false);
+
+			// 参数
 			bool isAddSingleQuote = false;
 			int lineCount = 20;
+			string separator = ",";
 
-            #region 参数处理
+			#region 参数处理
 
-            if (args != null)
+			if (args != null)
 			{
 				foreach (var item in args)
 				{
-					var arr = item.Split('=');
+					var arr = item.Split(new char[] { '=' }, 2);
 					var key = arr[0];
-					var value = arr.Last();
+					var value = "";
+					if(arr.Length > 1)
+						value = arr.Last();
+
 					switch(key)
 						{
 						case "style":
@@ -45,16 +52,19 @@ namespace TextFormatTool
 							if(!int.TryParse(value, out lineCount))
 								lineCount = 20;
 							break;
+						case "sepa":
+							separator = value;
+							break;
 					}
 				}
 			}
 
             #endregion
 
-            CopyText(isAddSingleQuote, lineCount);
+            CopyText(isAddSingleQuote, lineCount, separator);
 		}
 
-		public static void CopyText(bool isAddSingleQuote, int lineCount)
+		public static void CopyText(bool isAddSingleQuote, int lineCount, string separator)
 		{
 			try
 			{
@@ -77,12 +87,12 @@ namespace TextFormatTool
 					var lineList = items.Take(lineCount);
 					items = items.Skip(lineList.Count());
 					if (result.Length != 0)
-						result.Append(Environment.NewLine + ",");
+						result.Append(Environment.NewLine + separator);
 
 					if (isAddSingleQuote)
-						result.Append(string.Join(",", lineList.Select(p => $"'{p}'")));
+						result.Append(string.Join(separator, lineList.Select(p => $"'{p}'")));
 					else
-						result.Append(string.Join(",", lineList));
+						result.Append(string.Join(separator, lineList));
 				}
 			
 				Clipboard.SetDataObject(result.ToString(), copy: true);
