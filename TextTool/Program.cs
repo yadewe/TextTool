@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-namespace TextFormatTool
+namespace TextTool
 {
 
 	internal static class Program
