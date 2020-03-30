@@ -65,11 +65,10 @@ TextTool sylte=1 count=50 sepa=,";
             list = list.Distinct().ToList();
 
             StringBuilder result = new StringBuilder();
-            IEnumerable<string> items = list;
-            while (items.Count() > 0)
+            int index = 0;
+            while (index <= list.Count - 1)
             {
-                var lineList = items.Take(lineCount);
-                items = items.Skip(lineList.Count());
+                var lineList = list.GetRange(index, lineCount);
                 if (result.Length != 0)
                     result.Append(Environment.NewLine + separator);
 
@@ -77,6 +76,8 @@ TextTool sylte=1 count=50 sepa=,";
                     result.Append(string.Join(separator, lineList.Select(p => $"{prefix}{p}{suffix}")));
                 else
                     result.Append(string.Join(separator, lineList));
+
+                index += lineCount;
             }
 
             return result.ToString();
