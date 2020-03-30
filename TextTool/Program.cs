@@ -56,6 +56,7 @@ namespace TextTool
 							separator = value;
 							break;
 						case "?":
+						case "help":
 							Printhelp(value);
 							return;
 					}
