@@ -27,8 +27,16 @@ namespace TextTool
 
 			// 参数
 			bool isAddSingleQuote = false;
+			// 每行的项目数量
 			int lineCount = 20;
+			// 拼接字段
 			string separator = ",";
+			// 每项的前缀
+			string prefix = "'";
+			// 每项的后缀
+			string suffix = "'";
+			// 每一项的正则
+			string itemReg = @"[a-zA-Z0-9\.+_-]{1,}";
 
 			#region 参数处理
 
@@ -37,7 +45,7 @@ namespace TextTool
 				foreach (var item in args)
 				{
 					var arr = item.Split(new char[] { '=' }, 2);
-					var key = arr[0];
+					var key = arr[0].ToLower();
 					var value = "";
 					if(arr.Length > 1)
 						value = arr.Last();
@@ -59,13 +67,22 @@ namespace TextTool
 						case "help":
 							Printhelp(value);
 							return;
+						case "pre":
+							prefix = value;
+							break;
+						case "suf":
+							suffix = value;
+							break;
+						case "item_reg":
+							itemReg = value;
+							break;
 					}
 				}
 			}
 
             #endregion
 
-            CopyText(isAddSingleQuote, lineCount, separator);
+            CopyText(isAddSingleQuote, lineCount, separator, prefix, suffix, itemReg);
 		}
 
 		private static	void Printhelp(string param)
@@ -74,17 +91,25 @@ namespace TextTool
 			MessageBox.Show(@"格式化剪切板中的字符串，用逗号分隔
 参数支持：
 style：格式化样式，0 逗号拼接，1 逗号拼接+单引号
+pre：prefix 前缀，每一项的前缀，默认是单引号
+suf：suffix 后缀，每一项的后缀，默认是单引号
 count：每行数量
-sepa：用什么字符拼接，如,
-例子：TextTool sylte=1 count=50 sepa=,", Application.ProductName +"使用说明");
+sepa：separator 用什么字符拼接，如,
+item_reg：每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""
+?：显示帮助
+help：显示帮助
+【例子】：TextTool sylte=1 count=50 sepa=,", Application.ProductName +"使用说明");
 		}
-		public static void CopyText(bool isAddSingleQuote, int lineCount, string separator)
+		public static void CopyText(bool isAddSingleQuote, int lineCount, string separator,
+			string prefix,
+			string suffix,
+			string itemReg)
 		{
 			try
 			{
 				IDataObject dataObject = Clipboard.GetDataObject();
 				string input = (string)dataObject.GetData(DataFormats.Text);
-				MatchCollection matchCollection = Regex.Matches(input, "[a-zA-Z0-9\\._-]{1,}");
+				MatchCollection matchCollection = Regex.Matches(input, itemReg);
 				List<string> list = new List<string>();
 				foreach (Match item in matchCollection)
 				{
@@ -104,7 +129,7 @@ sepa：用什么字符拼接，如,
 						result.Append(Environment.NewLine + separator);
 
 					if (isAddSingleQuote)
-						result.Append(string.Join(separator, lineList.Select(p => $"'{p}'")));
+						result.Append(string.Join(separator, lineList.Select(p => $"{prefix}{p}{suffix}")));
 					else
 						result.Append(string.Join(separator, lineList));
 				}
