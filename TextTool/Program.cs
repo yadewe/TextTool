@@ -44,6 +44,7 @@ namespace TextTool
 
             if (args != null)
             {
+                string lastKey = "";
                 foreach (var item in args)
                 {
                     var arr = item.Split(new char[] { '=' }, 2);
@@ -67,7 +68,7 @@ namespace TextTool
                             break;
                         case "?":
                         case "help":
-                            Printhelp(value);
+                            Printhelp(lastKey);
                             return;
                         case "pre":
                             prefix = value;
@@ -79,6 +80,8 @@ namespace TextTool
                             itemReg = value;
                             break;
                     }
+
+                    lastKey = key;
                 }
             }
 
@@ -93,17 +96,32 @@ namespace TextTool
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fileVersionInfo.ProductVersion;
             //Application.SetCompatibleTextRenderingDefault(defaultValue: true);
-            MessageBox.Show(@"格式化剪切板中的字符串，用逗号分隔
+            Dictionary<string, string> dic = new Dictionary<string, string>() {
+                {"style", "格式化样式，0 逗号拼接，1 逗号拼接+单引号" },
+                {"pre", "prefix 前缀，每一项的前缀，默认是单引号" },
+                {"suf", "suffix 后缀，每一项的后缀，默认是单引号" },
+                {"count", "每行数量" },
+                {"sepa", "separator 用什么字符拼接，如," },
+                {"item_reg", @"每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""" },
+                {"?", "显示帮助" },
+                {"help", "显示帮助" },
+            };
+            string message = "";
+            if (dic.ContainsKey(param))
+            {
+                message = $"{param}：{dic[param]}";
+            }
+            else
+            {
+                message = $@"格式化剪切板中的字符串，用逗号分隔。
+程序运行之后会读取剪切板的文本内容，格式完之后写回剪切板。
 参数支持：
-style：格式化样式，0 逗号拼接，1 逗号拼接+单引号
-pre：prefix 前缀，每一项的前缀，默认是单引号
-suf：suffix 后缀，每一项的后缀，默认是单引号
-count：每行数量
-sepa：separator 用什么字符拼接，如,
-item_reg：每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""
-?：显示帮助
-help：显示帮助
-【例子】：TextTool sylte=1 count=50 sepa=,", $"{Application.ProductName} v{version} 使用说明");
+{string.Join(Environment.NewLine, dic.Select(p => $"{p.Key}：{p.Value}"))}
+【例子】
+TextTool sylte=1 count=50 sepa=,";
+            }
+
+            MessageBox.Show(message, $"{Application.ProductName} v{version} 使用说明");
         }
         private static void ClipboardTextHandle(bool isAddSingleQuote, int lineCount, string separator,
             string prefix,
