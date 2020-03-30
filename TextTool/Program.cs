@@ -28,7 +28,7 @@ namespace TextTool
             Application.SetCompatibleTextRenderingDefault(defaultValue: false);
 
             // 参数
-            bool isAddSingleQuote = false;
+            string style = "0";
             // 每行的项目数量
             int lineCount = 20;
             // 拼接字段
@@ -57,7 +57,7 @@ namespace TextTool
                     {
                         case "style":
                             // 加单引号
-                            isAddSingleQuote = value == "1";
+                            style = value;
                             break;
                         case "count":
                             if (!int.TryParse(value, out lineCount))
@@ -68,7 +68,7 @@ namespace TextTool
                             break;
                         case "?":
                         case "help":
-                            Printhelp(lastKey);
+                            new TextHandler().Printhelp(lastKey);
                             return;
                         case "pre":
                             prefix = value;
@@ -87,43 +87,13 @@ namespace TextTool
 
             #endregion
 
-            ClipboardTextHandle(isAddSingleQuote, lineCount, separator, prefix, suffix, itemReg);
+            ClipboardTextHandle(style, lineCount, separator, prefix, suffix, itemReg);
         }
 
-        private static void Printhelp(string param)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            string version = fileVersionInfo.ProductVersion;
-            //Application.SetCompatibleTextRenderingDefault(defaultValue: true);
-            Dictionary<string, string> dic = new Dictionary<string, string>() {
-                {"style", "格式化样式，0 逗号拼接，1 逗号拼接+单引号" },
-                {"pre", "prefix 前缀，每一项的前缀，默认是单引号" },
-                {"suf", "suffix 后缀，每一项的后缀，默认是单引号" },
-                {"count", "每行数量" },
-                {"sepa", "separator 用什么字符拼接，如," },
-                {"item_reg", @"每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""" },
-                {"?", "显示帮助" },
-                {"help", "显示帮助" },
-            };
-            string message = "";
-            if (dic.ContainsKey(param))
-            {
-                message = $"{param}：{dic[param]}";
-            }
-            else
-            {
-                message = $@"格式化剪切板中的字符串，用逗号分隔。
-程序运行之后会读取剪切板的文本内容，格式完之后写回剪切板。
-参数支持：
-{string.Join(Environment.NewLine, dic.Select(p => $"{p.Key}：{p.Value}"))}
-【例子】
-TextTool sylte=1 count=50 sepa=,";
-            }
-
-            MessageBox.Show(message, $"{Application.ProductName} v{version} 使用说明");
-        }
-        private static void ClipboardTextHandle(bool isAddSingleQuote, int lineCount, string separator,
+        private static void ClipboardTextHandle(
+            string style,
+            int lineCount,
+            string separator,
             string prefix,
             string suffix,
             string itemReg)
@@ -132,32 +102,14 @@ TextTool sylte=1 count=50 sepa=,";
             {
                 IDataObject dataObject = Clipboard.GetDataObject();
                 string input = (string)dataObject.GetData(DataFormats.Text);
-                MatchCollection matchCollection = Regex.Matches(input, itemReg);
-                List<string> list = new List<string>();
-                foreach (Match item in matchCollection)
-                {
-                    list.Add(item.Value);
-                }
-                list = list.Distinct().ToList();
 
-                // TODO count 20 every line
+                string output = "";
+                if (style == "2")
+                    output = new TextHandler().TextSplitHandle(input, prefix, suffix, itemReg);
+                else
+                    output = new TextHandler().TextJoinHandle(input, style == "1", lineCount, separator, prefix, suffix, itemReg);
 
-                StringBuilder result = new StringBuilder();
-                IEnumerable<string> items = list;
-                while (items.Count() > 0)
-                {
-                    var lineList = items.Take(lineCount);
-                    items = items.Skip(lineList.Count());
-                    if (result.Length != 0)
-                        result.Append(Environment.NewLine + separator);
-
-                    if (isAddSingleQuote)
-                        result.Append(string.Join(separator, lineList.Select(p => $"{prefix}{p}{suffix}")));
-                    else
-                        result.Append(string.Join(separator, lineList));
-                }
-
-                Clipboard.SetDataObject(result.ToString(), copy: true);
+                Clipboard.SetDataObject(output, copy: true);
             }
             catch (Exception)
             {
