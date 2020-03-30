@@ -100,11 +100,11 @@ TextTool sylte=1 count=50 sepa=,";
             List<string> list = new List<string>();
             prefix = Regex.Replace(prefix, @"[-[\]{}()*+?.,\\^$|#]", @"\$&");
             suffix = Regex.Replace(suffix, @"[-[\]{}()*+?.,\\^$|#]", @"\$&");
-            var newItemReg = $"({prefix})?(?<item>{itemReg})({suffix})?";
+            var newItemReg = $"({prefix})(?<item>{itemReg})({suffix})|(?<item2>{itemReg})";
             MatchCollection matchCollection = Regex.Matches(input, newItemReg);
             foreach (Match item in matchCollection)
             {
-                list.Add(item.Groups["item"].Value);
+                list.Add(item.Groups["item"]?.Value?? item.Groups["item2"].Value);
             }
             list = list.Distinct().ToList();
 
