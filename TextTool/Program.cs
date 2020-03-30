@@ -12,7 +12,7 @@ namespace TextFormatTool
 	internal static class Program
 	{
 		/// <summary>
-		/// 格式化剪切板中的字符串，用逗号分隔
+		/// 格式化剪切板中的字符串，用指定字符（默认逗号）拼接
 		/// </summary>
 		/// <param name="args">参数支持：
 		/// style：格式化样式，0 逗号拼接，1 逗号拼接+单引号
@@ -43,7 +43,7 @@ namespace TextFormatTool
 						value = arr.Last();
 
 					switch(key)
-						{
+					{
 						case "style":
 							// 加单引号
 							isAddSingleQuote = value == "1";
@@ -55,6 +55,9 @@ namespace TextFormatTool
 						case "sepa":
 							separator = value;
 							break;
+						case "?":
+							Printhelp(value);
+							return;
 					}
 				}
 			}
@@ -64,6 +67,16 @@ namespace TextFormatTool
             CopyText(isAddSingleQuote, lineCount, separator);
 		}
 
+		private static	void Printhelp(string param)
+		{
+			//Application.SetCompatibleTextRenderingDefault(defaultValue: true);
+			MessageBox.Show(@"格式化剪切板中的字符串，用逗号分隔
+参数支持：
+style：格式化样式，0 逗号拼接，1 逗号拼接+单引号
+count：每行数量
+sepa：用什么字符拼接，如,
+例子：TextTool sylte=1 count=50 sepa=,", Application.ProductName +"使用说明");
+		}
 		public static void CopyText(bool isAddSingleQuote, int lineCount, string separator)
 		{
 			try
