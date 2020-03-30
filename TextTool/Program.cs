@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace TextTool
 {
@@ -87,6 +89,9 @@ namespace TextTool
 
         private static void Printhelp(string param)
         {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fileVersionInfo.ProductVersion;
             //Application.SetCompatibleTextRenderingDefault(defaultValue: true);
             MessageBox.Show(@"格式化剪切板中的字符串，用逗号分隔
 参数支持：
@@ -98,7 +103,7 @@ sepa：separator 用什么字符拼接，如,
 item_reg：每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""
 ?：显示帮助
 help：显示帮助
-【例子】：TextTool sylte=1 count=50 sepa=,", Application.ProductName + "使用说明");
+【例子】：TextTool sylte=1 count=50 sepa=,", $"{Application.ProductName} v{version} 使用说明");
         }
         private static void ClipboardTextHandle(bool isAddSingleQuote, int lineCount, string separator,
             string prefix,
