@@ -70,7 +70,7 @@ TextTool sylte=1 count=50 sepa=,";
             {
                 var lineList = list.GetRange(index, lineCount);
                 if (result.Length != 0)
-                    result.Append(Environment.NewLine + separator);
+                    result.Append(separator + Environment.NewLine);
 
                 if (isAddSingleQuote)
                     result.Append(string.Join(separator, lineList.Select(p => $"{prefix}{p}{suffix}")));
