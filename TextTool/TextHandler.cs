@@ -24,7 +24,12 @@ namespace TextTool
             Option = option;
         }
 
-        public string Handler(string input)
+        /// <summary>
+        /// 处理文本
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string Handle(string input)
         {
             if (Option.Style == "2")
                 return TextSplitHandle(input, Option.Prefix, Option.Suffix, Option.ItemReg);
@@ -67,7 +72,7 @@ TextTool sylte=1 count=50 sepa=,";
             MessageBox.Show(message, $"{Application.ProductName} v{version} 使用说明");
         }
 
-        public string TextJoinHandle(
+        private string TextJoinHandle(
             string input,
             bool isAddSingleQuote,
             int lineCount,
@@ -115,7 +120,7 @@ TextTool sylte=1 count=50 sepa=,";
         /// <param name="suffix"></param>
         /// <param name="itemReg"></param>
         /// <returns></returns>
-        public string TextSplitHandle(
+        private string TextSplitHandle(
             string input,
             string prefix,
             string suffix,

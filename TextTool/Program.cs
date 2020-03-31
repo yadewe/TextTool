@@ -85,6 +85,8 @@ namespace TextTool
 
                 #endregion
 
+                #region 剪切板的文本处理
+
                 IDataObject dataObject = Clipboard.GetDataObject();
                 string input = (string)dataObject.GetData(DataFormats.Text);
                 if (string.IsNullOrWhiteSpace(input))
@@ -94,7 +96,7 @@ namespace TextTool
                     return;
                 }
 
-                string output = handler.Handler(input);
+                string output = handler.Handle(input);
 
                 Clipboard.SetDataObject(output, copy: true);
 
@@ -104,6 +106,8 @@ namespace TextTool
                     string title = "文本处理完成";
                     NotificationTool.ShowWindowsTip(handler.HandledTip, title, option.ShowTipSeconds);
                 }
+
+                #endregion
             }
             catch (Exception ex)
             {
