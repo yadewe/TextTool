@@ -15,12 +15,11 @@ namespace TextTool
             var notification = new System.Windows.Forms.NotifyIcon()
             {
                 Visible = true,
-                Icon = System.Drawing.SystemIcons.Information,
+                Icon = System.Drawing.SystemIcons.Application,
                 BalloonTipIcon = balloonTipIcon,
                 BalloonTipTitle = message,
                 BalloonTipText = tip,
                 Text = tip,
-
             };
 
             var showMinSeconds = showSeconds * 1000;

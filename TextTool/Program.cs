@@ -87,6 +87,12 @@ namespace TextTool
 
                 IDataObject dataObject = Clipboard.GetDataObject();
                 string input = (string)dataObject.GetData(DataFormats.Text);
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    string title = "没有文本需要处理";
+                    NotificationTool.ShowWindowsTip("空", title, 5, ToolTipIcon.Warning);
+                    return;
+                }
 
                 string output = handler.Handler(input);
 
