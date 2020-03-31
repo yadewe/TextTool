@@ -27,92 +27,87 @@ namespace TextTool
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(defaultValue: false);
 
-            // 参数
-            string style = "0";
-            // 每行的项目数量
-            int lineCount = 20;
-            // 拼接字段
-            string separator = ",";
-            // 每项的前缀
-            string prefix = "'";
-            // 每项的后缀
-            string suffix = "'";
-            // 每一项的正则
-            string itemReg = @"[a-zA-Z0-9\.+_-]{1,}";
-
-            #region 参数处理
-
-            if (args != null)
-            {
-                string lastKey = "";
-                foreach (var item in args)
-                {
-                    var arr = item.Split(new char[] { '=' }, 2);
-                    var key = arr[0].ToLower();
-                    var value = "";
-                    if (arr.Length > 1)
-                        value = arr.Last();
-
-                    switch (key)
-                    {
-                        case "style":
-                            // 加单引号
-                            style = value;
-                            break;
-                        case "count":
-                            if (!int.TryParse(value, out lineCount))
-                                lineCount = 20;
-                            break;
-                        case "sepa":
-                            separator = value;
-                            break;
-                        case "?":
-                        case "help":
-                            new TextHandler().Printhelp(lastKey);
-                            return;
-                        case "pre":
-                            prefix = value;
-                            break;
-                        case "suf":
-                            suffix = value;
-                            break;
-                        case "item_reg":
-                            itemReg = value;
-                            break;
-                    }
-
-                    lastKey = key;
-                }
-            }
-
-            #endregion
-
-            ClipboardTextHandle(style, lineCount, separator, prefix, suffix, itemReg);
-        }
-
-        private static void ClipboardTextHandle(
-            string style,
-            int lineCount,
-            string separator,
-            string prefix,
-            string suffix,
-            string itemReg)
-        {
             try
             {
+                var option = new TextHandlerOption();
+                var handler = new TextHandler(option);
+
+                #region 参数处理
+
+                if (args != null)
+                {
+                    string lastKey = "";
+                    foreach (var item in args)
+                    {
+                        var arr = item.Split(new char[] { '=' }, 2);
+                        var key = arr[0].ToLower();
+                        var value = "";
+                        if (arr.Length > 1)
+                            value = arr.Last();
+
+                        switch (key)
+                        {
+                            case "style":
+                                // 加单引号
+                                option.Style = value;
+                                break;
+                            case "count":
+                                int lineCount;
+                                if (int.TryParse(value, out lineCount))
+                                    option.LineCount = lineCount;
+                                break;
+                            case "sepa":
+                                option.Separator = value;
+                                break;
+                            case "?":
+                            case "help":
+                                handler.Printhelp(lastKey);
+                                return;
+                            case "pre":
+                                option.Prefix = value;
+                                break;
+                            case "suf":
+                                option.Suffix = value;
+                                break;
+                            case "item_reg":
+                                option.ItemReg = value;
+                                break;
+                            case "tip":
+                                int showTipSeconds;
+                                if (int.TryParse(value, out showTipSeconds))
+                                    option.ShowTipSeconds = showTipSeconds;
+                                break;
+                        }
+
+                        lastKey = key;
+                    }
+                }
+
+                #endregion
+
                 IDataObject dataObject = Clipboard.GetDataObject();
                 string input = (string)dataObject.GetData(DataFormats.Text);
 
-                string output = "";
-                if (style == "2")
-                    output = new TextHandler().TextSplitHandle(input, prefix, suffix, itemReg);
-                else
-                    output = new TextHandler().TextJoinHandle(input, style == "1", lineCount, separator, prefix, suffix, itemReg);
+                string output = handler.Handler(input);
 
                 Clipboard.SetDataObject(output, copy: true);
+
+                // 显示Tip
+                if (option.ShowTipSeconds > 0)
+                {
+                    string title = "文本处理完成";
+                    NotificationTool.ShowWindowsTip(handler.HandledTip, title, option.ShowTipSeconds);
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                try
+                {
+                    NotificationTool.ShowWindowsTip(ex.Message, "处理出现异常", 5, ToolTipIcon.Error);
+                }
+                catch (Exception)
+                {
+                }
             }
         }
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,6 +13,24 @@ namespace TextTool
 {
     public class TextHandler
     {
+        public string HandledOutput;
+        public int HandledItemCount;
+
+        public TextHandlerOption Option { get; set; }
+        public string HandledTip { get; internal set; }
+
+        public TextHandler(TextHandlerOption option)
+        {
+            Option = option;
+        }
+
+        public string Handler(string input)
+        {
+            if (Option.Style == "2")
+                return TextSplitHandle(input, Option.Prefix, Option.Suffix, Option.ItemReg);
+            else
+                return TextJoinHandle(input, Option.Style == "1", Option.LineCount, Option.Separator, Option.Prefix, Option.Suffix, Option.ItemReg);
+        }
 
         public void Printhelp(string param)
         {
@@ -26,6 +45,7 @@ namespace TextTool
                 {"count", "每行数量" },
                 {"sepa", "separator 用什么字符拼接，如," },
                 {"item_reg", @"每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""" },
+                {"tip", "显示通知的时间，默认0，不显示" },
                 {"?", "显示帮助" },
                 {"help", "显示帮助" },
             };
@@ -68,7 +88,8 @@ TextTool sylte=1 count=50 sepa=,";
             int index = 0;
             while (index <= list.Count - 1)
             {
-                var lineList = list.GetRange(index, lineCount);
+                var remainCount = list.Count - index;
+                var lineList = list.GetRange(index, remainCount > lineCount ? lineCount : remainCount);
                 if (result.Length != 0)
                     result.Append(separator + Environment.NewLine);
 
@@ -80,7 +101,10 @@ TextTool sylte=1 count=50 sepa=,";
                 index += lineCount;
             }
 
-            return result.ToString();
+            HandledItemCount = list.Count;
+            HandledOutput = result.ToString();
+            HandledTip = $"已经 拼接 {HandledItemCount} 个";
+            return HandledOutput;
         }
 
         /// <summary>
@@ -104,11 +128,57 @@ TextTool sylte=1 count=50 sepa=,";
             MatchCollection matchCollection = Regex.Matches(input, newItemReg);
             foreach (Match item in matchCollection)
             {
-                list.Add(item.Groups["item"]?.Value?? item.Groups["item2"].Value);
+                list.Add(item.Groups["item"]?.Value ?? item.Groups["item2"].Value);
             }
             list = list.Distinct().ToList();
 
-            return string.Join(Environment.NewLine, list);
+            HandledItemCount = list.Count;
+            HandledOutput = string.Join(Environment.NewLine, list);
+            HandledTip = $"已经 拆解 {HandledItemCount} 个";
+            return HandledOutput;
         }
+
+
+    }
+
+    public class TextHandlerOption
+    {
+        public TextHandlerOption()
+        {
+            Style = "0";
+            LineCount = 20;
+            Separator = ",";
+            Prefix = "'";
+            Suffix = "'";
+            ItemReg = @"[a-zA-Z0-9\.+_-]{1,}";
+        }
+        /// <summary>
+        /// 处理样式
+        /// </summary>
+        public string Style { get; set; }
+        /// <summary>
+        /// 每行的项目数量
+        /// </summary>
+        public int LineCount { get; set; }
+        /// <summary>
+        /// 拼接字符
+        /// </summary>
+        public string Separator { get; set; }
+        /// <summary>
+        /// 每项的前缀
+        /// </summary>
+        public string Prefix { get; set; }
+        /// <summary>
+        /// 每项的后缀
+        /// </summary>
+        public string Suffix { get; set; }
+        /// <summary>
+        /// 每一项的正则
+        /// </summary>
+        public string ItemReg { get; set; }
+        /// <summary>
+        /// 显示结果通知的时间
+        /// </summary>
+        public int ShowTipSeconds { get; set; }
     }
 }
