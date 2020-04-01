@@ -77,6 +77,9 @@ namespace TextTool
                                 if (int.TryParse(value, out showTipSeconds))
                                     option.ShowTipSeconds = showTipSeconds;
                                 break;
+                            case "rep":
+                                option.IsKeepRepeat = value == "1" || value?.ToLower() == "true";
+                                break;
                         }
 
                         lastKey = key;

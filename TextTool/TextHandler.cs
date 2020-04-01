@@ -51,6 +51,7 @@ namespace TextTool
                 {"sepa", "separator 用什么字符拼接，如," },
                 {"item_reg", @"每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""" },
                 {"tip", "显示通知的时间，默认0，不显示" },
+                {"rep", "repeat 是否要去重，默认0 去重，1 保持重复的项，不去重" },
                 {"?", "显示帮助" },
                 {"help", "显示帮助" },
             };
@@ -88,7 +89,8 @@ TextTool sylte=1 count=50 sepa=,";
                 list.Add(item.Value);
             }
             var repeatCount = list.Count;
-            list = list.Distinct().ToList();
+            if (!Option.IsKeepRepeat)
+                list = list.Distinct().ToList();
 
             StringBuilder result = new StringBuilder();
             int index = 0;
@@ -137,7 +139,8 @@ TextTool sylte=1 count=50 sepa=,";
                 list.Add(item.Groups["item"]?.Value ?? item.Groups["item2"].Value);
             }
             var repeatCount = list.Count;
-            list = list.Distinct().ToList();
+            if (!Option.IsKeepRepeat)
+                list = list.Distinct().ToList();
 
             HandledItemCount = list.Count;
             HandledOutput = string.Join(Environment.NewLine, list);
@@ -187,5 +190,9 @@ TextTool sylte=1 count=50 sepa=,";
         /// 显示结果通知的时间
         /// </summary>
         public int ShowTipSeconds { get; set; }
+        /// <summary>
+        /// 是否要去重
+        /// </summary>
+        public bool IsKeepRepeat { get; set; }
     }
 }
