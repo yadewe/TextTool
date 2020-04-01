@@ -87,6 +87,7 @@ TextTool sylte=1 count=50 sepa=,";
             {
                 list.Add(item.Value);
             }
+            var repeatCount = list.Count;
             list = list.Distinct().ToList();
 
             StringBuilder result = new StringBuilder();
@@ -108,7 +109,7 @@ TextTool sylte=1 count=50 sepa=,";
 
             HandledItemCount = list.Count;
             HandledOutput = result.ToString();
-            HandledTip = $"已经 拼接 {HandledItemCount} 个";
+            HandledTip = $"已经 拼接 {HandledItemCount} 个{(repeatCount == HandledItemCount ? "" : $"，去重前{repeatCount}个")}";
             return HandledOutput;
         }
 
@@ -135,11 +136,12 @@ TextTool sylte=1 count=50 sepa=,";
             {
                 list.Add(item.Groups["item"]?.Value ?? item.Groups["item2"].Value);
             }
+            var repeatCount = list.Count;
             list = list.Distinct().ToList();
 
             HandledItemCount = list.Count;
             HandledOutput = string.Join(Environment.NewLine, list);
-            HandledTip = $"已经 拆解 {HandledItemCount} 个";
+            HandledTip = $"已经 拆解 {HandledItemCount} 个{(repeatCount == HandledItemCount ? "" : $"，去重前{repeatCount}个")}";
             return HandledOutput;
         }
 

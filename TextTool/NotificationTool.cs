@@ -10,14 +10,14 @@ namespace TextTool
 {
     public static class NotificationTool
     {
-        public static void ShowWindowsTip(string tip, string message = null, int showSeconds = 3, ToolTipIcon balloonTipIcon = ToolTipIcon.Info)
+        public static void ShowWindowsTip(string tip, string title = null, int showSeconds = 3, ToolTipIcon balloonTipIcon = ToolTipIcon.Info)
         {
             var notification = new System.Windows.Forms.NotifyIcon()
             {
                 Visible = true,
                 Icon = System.Drawing.SystemIcons.Application,
                 BalloonTipIcon = balloonTipIcon,
-                BalloonTipTitle = message,
+                BalloonTipTitle = title,
                 BalloonTipText = tip,
                 Text = tip,
             };
