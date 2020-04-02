@@ -90,6 +90,9 @@ namespace TextTool
 
                 #region 剪切板的文本处理
 
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+
                 IDataObject dataObject = Clipboard.GetDataObject();
                 string input = (string)dataObject.GetData(DataFormats.Text);
                 if (string.IsNullOrWhiteSpace(input))
@@ -103,11 +106,20 @@ namespace TextTool
 
                 Clipboard.SetDataObject(output, copy: true);
 
+                sw.Stop();
                 // 显示Tip
                 if (option.ShowTipSeconds > 0)
                 {
                     string title = "文本处理完成";
-                    NotificationTool.ShowWindowsTip(handler.HandledTip, title, option.ShowTipSeconds);
+                    string message = handler.HandledTip;
+                    if (sw.ElapsedMilliseconds > 1)
+                    {
+                        // 精确到小数点后x位
+                        var length = (sw.ElapsedMilliseconds % 1000).ToString().Length;
+                        int? num = Math.Max(4 - length, 1);
+                        message += $" 花费{sw.Elapsed.TotalSeconds.ToString($"N{num}")}s";
+                    }
+                    NotificationTool.ShowWindowsTip(message, title, option.ShowTipSeconds);
                 }
 
                 #endregion
