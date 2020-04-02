@@ -32,9 +32,9 @@ namespace TextTool
         public string Handle(string input)
         {
             if (Option.Style == "2")
-                return TextSplitHandle(input, Option.Prefix, Option.Suffix, Option.ItemReg);
+                return TextSplitHandle(input, Option.Prefix, Option.Suffix, Option.ItemReg, Option.IsKeepRepeat);
             else
-                return TextJoinHandle(input, Option.Style == "1", Option.LineCount, Option.Separator, Option.Prefix, Option.Suffix, Option.ItemReg);
+                return TextJoinHandle(input, Option.Style == "1", Option.LineCount, Option.Separator, Option.Prefix, Option.Suffix, Option.ItemReg, Option.IsKeepRepeat);
         }
 
         public void Printhelp(string param)
@@ -47,7 +47,7 @@ namespace TextTool
                 {"style", "格式化样式，0 逗号拼接，1 逗号拼接+单引号，2 拆分成多行" },
                 {"pre", "prefix 前缀，每一项的前缀，默认是单引号" },
                 {"suf", "suffix 后缀，每一项的后缀，默认是单引号" },
-                {"count", "每行数量" },
+                {"count", "每行数量，默认20，小于等于0时不换行" },
                 {"sepa", "separator 用什么字符拼接，如," },
                 {"item_reg", @"每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""" },
                 {"tip", "显示通知的时间，默认0，不显示" },
@@ -80,7 +80,8 @@ TextTool sylte=1 count=50 sepa=,";
             string separator,
             string prefix,
             string suffix,
-            string itemReg)
+            string itemReg,
+            bool isKeepRepeat)
         {
             List<string> list = new List<string>();
             MatchCollection matchCollection = Regex.Matches(input, itemReg);
@@ -89,8 +90,12 @@ TextTool sylte=1 count=50 sepa=,";
                 list.Add(item.Value);
             }
             var repeatCount = list.Count;
-            if (!Option.IsKeepRepeat)
+            if (!isKeepRepeat)
                 list = list.Distinct().ToList();
+
+            // 大于0时才换行
+            if (lineCount <= 0)
+                lineCount = list.Count;
 
             StringBuilder result = new StringBuilder();
             int index = 0;
@@ -127,7 +132,8 @@ TextTool sylte=1 count=50 sepa=,";
             string input,
             string prefix,
             string suffix,
-            string itemReg)
+            string itemReg,
+            bool isKeepRepeat)
         {
             List<string> list = new List<string>();
             prefix = Regex.Replace(prefix, @"[-[\]{}()*+?.,\\^$|#]", @"\$&");
@@ -139,7 +145,7 @@ TextTool sylte=1 count=50 sepa=,";
                 list.Add(item.Groups["item"]?.Value ?? item.Groups["item2"].Value);
             }
             var repeatCount = list.Count;
-            if (!Option.IsKeepRepeat)
+            if (!isKeepRepeat)
                 list = list.Distinct().ToList();
 
             HandledItemCount = list.Count;
