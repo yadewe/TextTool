@@ -23,19 +23,21 @@ namespace TextTool
             };
 
             var showMinSeconds = showSeconds * 1000;
-            //notification.BalloonTipClosed += (sender, args) => notification.Dispose();
-            //notification.BalloonTipClicked += (sender, args) => notification.Dispose();
+
+            // 不确定主线程不等待，这个还会不会被执行
+            notification.BalloonTipClosed += (sender, args) => notification.Dispose();
+            notification.BalloonTipClicked += (sender, args) => notification.Dispose();
             // Display for 5 seconds.
             notification.ShowBalloonTip(showMinSeconds);
 
-            // This will let the balloon close after it's 5 second timeout
-            // for demonstration purposes. Comment this out to see what happens
-            // when dispose is called while a balloon is still visible.
-            Thread.Sleep(showMinSeconds);
+            //// This will let the balloon close after it's 5 second timeout
+            //// for demonstration purposes. Comment this out to see what happens
+            //// when dispose is called while a balloon is still visible.
+            //Thread.Sleep(showMinSeconds);
 
-            // The notification should be disposed when you don't need it anymore,
-            // but doing so will immediately close the balloon if it's visible.
-            notification.Dispose();
+            //// The notification should be disposed when you don't need it anymore,
+            //// but doing so will immediately close the balloon if it's visible.
+            //notification.Dispose();
         }
     }
 }
