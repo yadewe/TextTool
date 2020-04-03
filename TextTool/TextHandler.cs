@@ -44,11 +44,11 @@ namespace TextTool
             string version = fileVersionInfo.ProductVersion;
             //Application.SetCompatibleTextRenderingDefault(defaultValue: true);
             Dictionary<string, string> dic = new Dictionary<string, string>() {
-                {"style", "格式化样式，0 逗号拼接，1 逗号拼接+单引号，2 拆分成多行" },
+                {"type", "格式化类型，0 用分隔符拼接，1 加前、后缀再拼接，2 拆分成多行" },
                 {"pre", "prefix 前缀，每一项的前缀，默认是单引号" },
                 {"suf", "suffix 后缀，每一项的后缀，默认是单引号" },
                 {"count", "每行数量，默认20，小于等于0时不换行" },
-                {"sepa", "separator 用什么字符拼接，如," },
+                {"sepa", "separator 分隔符，用什么字符拼接，如," },
                 {"item_reg", @"每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""" },
                 {"tip", "显示通知的时间，默认0，不显示" },
                 {"rep", "repeat 是否要去重，默认0 去重，1 保持重复的项，不去重" },
