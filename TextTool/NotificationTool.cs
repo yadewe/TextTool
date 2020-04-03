@@ -25,10 +25,11 @@ namespace TextTool
 
             var showMinSeconds = showSeconds * 1000;
 
+            // 没有预想的效果
             bool isClosed = false;
             // 不确定主线程不等待，这个还会不会被执行（会有个图片在右下角那显示，不会自动取消）
-            notification.BalloonTipClosed += (sender, args) => { isClosed = true; MessageBox.Show("BalloonTipClosed " + DateTime.Now); };
-            notification.BalloonTipClicked += (sender, args) => { isClosed = true; MessageBox.Show("BalloonTipClicked " + DateTime.Now); };
+            notification.BalloonTipClosed += (sender, args) => { isClosed = true; };
+            notification.BalloonTipClicked += (sender, args) => { isClosed = true; };
             // Display for 5 seconds.
             notification.ShowBalloonTip(showMinSeconds);
 
