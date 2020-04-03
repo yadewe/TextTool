@@ -40,20 +40,23 @@ namespace TextTool
                     foreach (var item in args)
                     {
                         var arr = item.Split(new char[] { '=' }, 2);
-                        var key = arr[0].ToLower();
+                        var key = arr[0].Trim().ToLower();
                         var value = "";
                         if (arr.Length > 1)
                             value = arr.Last();
 
                         switch (key)
                         {
+                            case "type":
                             case "style":
                                 // 加单引号
-                                option.Style = value;
+                                TextTypeEnum type;
+                                if (Enum.TryParse(value.Trim(), out type))
+                                    option.Type = type;
                                 break;
                             case "count":
                                 int lineCount;
-                                if (int.TryParse(value, out lineCount))
+                                if (int.TryParse(value.Trim(), out lineCount))
                                     option.LineCount = lineCount;
                                 break;
                             case "sepa":

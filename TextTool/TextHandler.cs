@@ -31,10 +31,10 @@ namespace TextTool
         /// <returns></returns>
         public string Handle(string input)
         {
-            if (Option.Style == "2")
+            if (Option.Type == TextTypeEnum.Split)
                 return TextSplitHandle(input, Option.Prefix, Option.Suffix, Option.ItemReg, Option.IsKeepRepeat);
             else
-                return TextJoinHandle(input, Option.Style == "1", Option.LineCount, Option.Separator, Option.Prefix, Option.Suffix, Option.ItemReg, Option.IsKeepRepeat);
+                return TextJoinHandle(input, Option.Type == TextTypeEnum.PreSufJoin, Option.LineCount, Option.Separator, Option.Prefix, Option.Suffix, Option.ItemReg, Option.IsKeepRepeat);
         }
 
         public void Printhelp(string param)
@@ -164,7 +164,7 @@ TextTool sylte=1 count=50 sepa=,";
     {
         public TextHandlerOption()
         {
-            Style = "0";
+            Type = TextTypeEnum.Join;
             LineCount = 20;
             Separator = ",";
             Prefix = "'";
@@ -174,13 +174,13 @@ TextTool sylte=1 count=50 sepa=,";
         /// <summary>
         /// 处理样式
         /// </summary>
-        public string Style { get; set; }
+        public TextTypeEnum Type { get; set; }
         /// <summary>
         /// 每行的项目数量
         /// </summary>
         public int LineCount { get; set; }
         /// <summary>
-        /// 拼接字符
+        /// 分隔符，拼接字符
         /// </summary>
         public string Separator { get; set; }
         /// <summary>
@@ -203,5 +203,24 @@ TextTool sylte=1 count=50 sepa=,";
         /// 是否要去重
         /// </summary>
         public bool IsKeepRepeat { get; set; }
+    }
+
+    /// <summary>
+    /// 处理操作的类型
+    /// </summary>
+    public enum TextTypeEnum
+    {
+        /// <summary>
+        /// 用分隔符拼接
+        /// </summary>
+        Join = 0,
+        /// <summary>
+        /// 加前/后缀之后拼接
+        /// </summary>
+        PreSufJoin = 1,
+        /// <summary>
+        /// 拆解
+        /// </summary>
+        Split = 2
     }
 }
