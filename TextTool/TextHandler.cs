@@ -142,7 +142,10 @@ TextTool sylte=1 count=50 sepa=,";
             MatchCollection matchCollection = Regex.Matches(input, newItemReg);
             foreach (Match item in matchCollection)
             {
-                list.Add(item.Groups["item"]?.Value ?? item.Groups["item2"].Value);
+                if (item.Groups["item"].Success)
+                    list.Add(item.Groups["item"].Value);
+                else
+                    list.Add(item.Groups["item2"].Value);
             }
             var repeatCount = list.Count;
             if (!isKeepRepeat)
