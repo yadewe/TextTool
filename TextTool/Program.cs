@@ -27,140 +27,115 @@ namespace TextTool
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(defaultValue: false);
 
-            // 参数
-            bool isAddSingleQuote = false;
-            // 每行的项目数量
-            int lineCount = 20;
-            // 拼接字段
-            string separator = ",";
-            // 每项的前缀
-            string prefix = "'";
-            // 每项的后缀
-            string suffix = "'";
-            // 每一项的正则
-            string itemReg = @"[a-zA-Z0-9\.+_-]{1,}";
-
-            #region 参数处理
-
-            if (args != null)
-            {
-                string lastKey = "";
-                foreach (var item in args)
-                {
-                    var arr = item.Split(new char[] { '=' }, 2);
-                    var key = arr[0].ToLower();
-                    var value = "";
-                    if (arr.Length > 1)
-                        value = arr.Last();
-
-                    switch (key)
-                    {
-                        case "style":
-                            // 加单引号
-                            isAddSingleQuote = value == "1";
-                            break;
-                        case "count":
-                            if (!int.TryParse(value, out lineCount))
-                                lineCount = 20;
-                            break;
-                        case "sepa":
-                            separator = value;
-                            break;
-                        case "?":
-                        case "help":
-                            Printhelp(lastKey);
-                            return;
-                        case "pre":
-                            prefix = value;
-                            break;
-                        case "suf":
-                            suffix = value;
-                            break;
-                        case "item_reg":
-                            itemReg = value;
-                            break;
-                    }
-
-                    lastKey = key;
-                }
-            }
-
-            #endregion
-
-            ClipboardTextHandle(isAddSingleQuote, lineCount, separator, prefix, suffix, itemReg);
-        }
-
-        private static void Printhelp(string param)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            string version = fileVersionInfo.ProductVersion;
-            //Application.SetCompatibleTextRenderingDefault(defaultValue: true);
-            Dictionary<string, string> dic = new Dictionary<string, string>() {
-                {"style", "格式化样式，0 逗号拼接，1 逗号拼接+单引号" },
-                {"pre", "prefix 前缀，每一项的前缀，默认是单引号" },
-                {"suf", "suffix 后缀，每一项的后缀，默认是单引号" },
-                {"count", "每行数量" },
-                {"sepa", "separator 用什么字符拼接，如," },
-                {"item_reg", @"每项的正则表达式，注意值最好是加双引号，默认是item_reg=""[a-zA-Z0-9\.+_-]{1,}""" },
-                {"?", "显示帮助" },
-                {"help", "显示帮助" },
-            };
-            string message = "";
-            if (dic.ContainsKey(param))
-            {
-                message = $"{param}：{dic[param]}";
-            }
-            else
-            {
-                message = $@"格式化剪切板中的字符串，用逗号分隔。
-程序运行之后会读取剪切板的文本内容，格式完之后写回剪切板。
-参数支持：
-{string.Join(Environment.NewLine, dic.Select(p => $"{p.Key}：{p.Value}"))}
-【例子】
-TextTool sylte=1 count=50 sepa=,";
-            }
-
-            MessageBox.Show(message, $"{Application.ProductName} v{version} 使用说明");
-        }
-        private static void ClipboardTextHandle(bool isAddSingleQuote, int lineCount, string separator,
-            string prefix,
-            string suffix,
-            string itemReg)
-        {
             try
             {
+                var option = new TextHandlerOption();
+                var handler = new TextHandler(option);
+
+                #region 参数处理
+
+                if (args != null)
+                {
+                    string lastKey = "";
+                    foreach (var item in args)
+                    {
+                        var arr = item.Split(new char[] { '=' }, 2);
+                        var key = arr[0].Trim().ToLower();
+                        var value = "";
+                        if (arr.Length > 1)
+                            value = arr.Last();
+
+                        switch (key)
+                        {
+                            case "type":
+                            case "style":
+                                // 加单引号
+                                TextTypeEnum type;
+                                if (Enum.TryParse(value.Trim(), out type))
+                                    option.Type = type;
+                                break;
+                            case "count":
+                                int lineCount;
+                                if (int.TryParse(value.Trim(), out lineCount))
+                                    option.LineCount = lineCount;
+                                break;
+                            case "sepa":
+                                option.Separator = value;
+                                break;
+                            case "?":
+                            case "help":
+                                handler.Printhelp(lastKey);
+                                return;
+                            case "pre":
+                                option.Prefix = value;
+                                break;
+                            case "suf":
+                                option.Suffix = value;
+                                break;
+                            case "item_reg":
+                                option.ItemReg = value;
+                                break;
+                            case "tip":
+                                int showTipSeconds;
+                                if (int.TryParse(value, out showTipSeconds))
+                                    option.ShowTipSeconds = showTipSeconds;
+                                break;
+                            case "rep":
+                                option.IsKeepRepeat = value == "1" || value?.ToLower() == "true";
+                                break;
+                        }
+
+                        lastKey = key;
+                    }
+                }
+
+                #endregion
+
+                #region 剪切板的文本处理
+
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+
                 IDataObject dataObject = Clipboard.GetDataObject();
                 string input = (string)dataObject.GetData(DataFormats.Text);
-                MatchCollection matchCollection = Regex.Matches(input, itemReg);
-                List<string> list = new List<string>();
-                foreach (Match item in matchCollection)
+                if (string.IsNullOrWhiteSpace(input))
                 {
-                    list.Add(item.Value);
-                }
-                list = list.Distinct().ToList();
-
-                // TODO count 20 every line
-
-                StringBuilder result = new StringBuilder();
-                IEnumerable<string> items = list;
-                while (items.Count() > 0)
-                {
-                    var lineList = items.Take(lineCount);
-                    items = items.Skip(lineList.Count());
-                    if (result.Length != 0)
-                        result.Append(Environment.NewLine + separator);
-
-                    if (isAddSingleQuote)
-                        result.Append(string.Join(separator, lineList.Select(p => $"{prefix}{p}{suffix}")));
-                    else
-                        result.Append(string.Join(separator, lineList));
+                    string title = "没有文本需要处理";
+                    NotificationTool.ShowWindowsTip("空", title, 5, ToolTipIcon.Warning);
+                    return;
                 }
 
-                Clipboard.SetDataObject(result.ToString(), copy: true);
+                string output = handler.Handle(input);
+
+                Clipboard.SetDataObject(output, copy: true);
+
+                sw.Stop();
+                // 显示Tip
+                if (option.ShowTipSeconds > 0)
+                {
+                    string title = "文本处理完成";
+                    string message = handler.HandledTip;
+                    if (sw.ElapsedMilliseconds > 1)
+                    {
+                        // 精确到小数点后x位
+                        var length = (sw.ElapsedMilliseconds % 1000).ToString().Length;
+                        int? num = Math.Max(4 - length, 1);
+                        message += $" 花费{sw.Elapsed.TotalSeconds.ToString($"N{num}")}s";
+                    }
+                    NotificationTool.ShowWindowsTip(message, title, option.ShowTipSeconds);
+                }
+
+                #endregion
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                try
+                {
+                    NotificationTool.ShowWindowsTip(ex.Message, "处理出现异常", 5, ToolTipIcon.Error);
+                }
+                catch (Exception)
+                {
+                }
             }
         }
 
