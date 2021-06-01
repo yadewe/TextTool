@@ -63,7 +63,9 @@ namespace TextTool
                                 option.Separator = value;
                                 break;
                             case "?":
+                            case "/?":
                             case "help":
+                            case "/help":
                                 handler.Printhelp(lastKey);
                                 return;
                             case "pre":

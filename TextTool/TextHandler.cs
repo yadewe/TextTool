@@ -44,7 +44,7 @@ namespace TextTool
             string version = fileVersionInfo.ProductVersion;
             //Application.SetCompatibleTextRenderingDefault(defaultValue: true);
             Dictionary<string, string> dic = new Dictionary<string, string>() {
-                {"type", "格式化类型，0 用分隔符拼接，1 加前、后缀再拼接，2 拆分成多行" },
+                {"type/style", "格式化类型，0 用分隔符拼接，1 加前、后缀再拼接，2 拆分成多行" },
                 {"pre", "prefix 前缀，每一项的前缀，默认是单引号" },
                 {"suf", "suffix 后缀，每一项的后缀，默认是单引号" },
                 {"count", "每行数量，默认20，小于等于0时不换行" },
@@ -67,10 +67,11 @@ namespace TextTool
 参数支持：
 {string.Join(Environment.NewLine, dic.Select(p => $"{p.Key}：{p.Value}"))}
 【例子】
-TextTool sylte=1 count=50 sepa=,";
+TextTool type=1 count=50 sepa=, pre=' suf=' count=20 item_reg=""[a-zA-Z0-9\.+_-]{1,}"" tip=0 rep=0";
             }
 
             MessageBox.Show(message, $"{Application.ProductName} v{version} 使用说明");
+            Console.WriteLine(message);
         }
 
         private string TextJoinHandle(

@@ -35,3 +35,7 @@ Text string format tool. It can read your clipboard text data to format, and the
 ```
 TextTool.exe ?
 ```
+## example
+```
+TextTool type=1 count=50 sepa=, pre=' suf=' count=20 item_reg="[a-zA-Z0-9\.+_-]{1,}" tip=0 rep=0
+```
