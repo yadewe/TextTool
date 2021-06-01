@@ -4,5 +4,6 @@
 
 /.vs
 /TextTool/bin
-/TextTool/obj
+/*/obj
 *.user
+/*/bin
